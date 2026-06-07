@@ -1,28 +1,16 @@
-# Big
+# WZmodBig
 This Warzone 2100 mod adds big units and structures.
 
 # Build
 ```bash
-python3 main.py --scale 2 --inputs '[{"id":"tracked01","stat_file":"propulsion.json"},{"id":"Body11ABT","stat_file":"body.json"},{"id":"Cannon4AUTOMk1","stat_file":"weapons.json"},{"id":"PillBox4","stat_file":"structure.json"}]'
+python3 main.py --scale 2 --inputs tracked01 Body11ABT Cannon4AUTOMk1 PillBox4
 ```
 or
 ```bash
-python3 main.py --scale 2 \
-        --weapons $(grep -oP 'turrets:\s*\["x2_\K[^"]+' TEMPLATES.js | sort -u) \
-        --bodies $(grep -oP 'body:\s*"x2_\K[^"]+' TEMPLATES.js | sort -u) \
-        --propulsions $(grep -oP 'propulsion:\s*"x2_\K[^"]+' TEMPLATES.js | sort -u) && \
-python3 main.py --scale 3 \
-        --weapons $(grep -oP 'turrets:\s*\["x3_\K[^"]+' TEMPLATES.js | sort -u) \
-        --bodies $(grep -oP 'body:\s*"x3_\K[^"]+' TEMPLATES.js | sort -u) \
-        --propulsions $(grep -oP 'propulsion:\s*"x3_\K[^"]+' TEMPLATES.js | sort -u) && \
-python3 main.py --scale 4 \
-        --weapons $(grep -oP 'turrets:\s*\["x4_\K[^"]+' TEMPLATES.js | sort -u) \
-        --bodies $(grep -oP 'body:\s*"x4_\K[^"]+' TEMPLATES.js | sort -u) \
-        --propulsions $(grep -oP 'propulsion:\s*"x4_\K[^"]+' TEMPLATES.js | sort -u) && \
-python3 main.py --scale 5 \
-        --weapons $(grep -oP 'turrets:\s*\["x5_\K[^"]+' TEMPLATES.js | sort -u) \
-        --bodies $(grep -oP 'body:\s*"x5_\K[^"]+' TEMPLATES.js | sort -u) \
-        --propulsions $(grep -oP 'propulsion:\s*"x5_\K[^"]+' TEMPLATES.js | sort -u)
+python3 main.py --scale 2 --inputs $(grep -oP 'x2_\K[^"]+' TEMPLATES.js | sort -u)
+python3 main.py --scale 3 --inputs $(grep -oP 'x3_\K[^"]+' TEMPLATES.js | sort -u)
+python3 main.py --scale 4 --inputs $(grep -oP 'x4_\K[^"]+' TEMPLATES.js | sort -u)
+python3 main.py --scale 5 --inputs $(grep -oP 'x5_\K[^"]+' TEMPLATES.js | sort -u)
 ```
 
 ## License
