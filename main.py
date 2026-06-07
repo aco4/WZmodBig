@@ -51,11 +51,11 @@ def main():
         for pie_name in discovered_pie_names:
             pending_pie_names.add(pie_name)
 
-        for stat_id in discovered_stat_ids:
-            args.inputs.append(stat_id)
+        for discovered_stat_id in discovered_stat_ids:
+            args.inputs.append(discovered_stat_id)
 
         # Collect diffs
-        diffs[stat_file][stat_id] = new_stat_item
+        diffs[stat_file][PREFIX + stat_id] = new_stat_item
 
         # Mark stat item as complete
         finished_entries.add(stat_id)
