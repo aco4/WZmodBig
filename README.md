@@ -2,15 +2,39 @@
 This Warzone 2100 mod adds big units and structures.
 
 # Build
+The build script is `main.py`.
+## Example usage
 ```bash
-python3 main.py --scale 2 --inputs tracked01 Body11ABT Cannon4AUTOMk1 PillBox4
+python3 main.py --scale 2 --inputs tracked01 Body11ABT Cannon1Mk1 PillBox4
 ```
-or
+Spawn the big versions in-game with cheat `give all` or WZ JS API functions:
+```js
+addDroid(player, x, y, "P.1000 Ratte", "x2_Body11ABT", "x2_tracked01", "", "", "x2_Cannon1Mk1");
+addStructure("x2_PillBox4", player, x, y);
+```
+By default, the mod will generate dedicated propulsions only for each input listed (e.g. `tracked01` ⟶ `x2_tracked01`). To allow normal propulsion to fit onto big bodies instead, pass `--vanillapropulsion`:
 ```bash
-python3 main.py --scale 2 --inputs $(grep -oP 'x2_\K[^"]+' TEMPLATES.js | sort -u)
-python3 main.py --scale 3 --inputs $(grep -oP 'x3_\K[^"]+' TEMPLATES.js | sort -u)
-python3 main.py --scale 4 --inputs $(grep -oP 'x4_\K[^"]+' TEMPLATES.js | sort -u)
-python3 main.py --scale 5 --inputs $(grep -oP 'x5_\K[^"]+' TEMPLATES.js | sort -u)
+python3 main.py --scale 2 --inputs tracked01 Body11ABT Cannon1Mk1 PillBox4 --vanillapropulsion
+```
+Now works:
+```js
+addDroid(player, x, y, "P.1000 Ratte", "x2_Body11ABT", "tracked01", "", "", "x2_Cannon1Mk1");
+```
+To allow other propulsions to be compatible, include them:
+```bash
+python3 main.py --scale 2 --inputs wheeled01 HalfTrack tracked01 hover01 V-Tol Body11ABT Cannon1Mk1 PillBox4 --vanillapropulsion
+```
+## Suggested usage
+To scan a directory for inputs, use grep:
+```bash
+python3 main.py --scale 2 --inputs $(grep -rhoP 'x2_\K[^"]+' /path/to/directory/or/file)
+```
+To generate multiple sizes:
+```bash
+python3 main.py --x2_inputs $(grep -rhoP 'x2_\K[^"]+' /path/to/directory/or/file) \
+                --x3_inputs $(grep -rhoP 'x3_\K[^"]+' /path/to/directory/or/file) \
+                --x4_inputs $(grep -rhoP 'x4_\K[^"]+' /path/to/directory/or/file) \
+                --x5_inputs $(grep -rhoP 'x5_\K[^"]+' /path/to/directory/or/file)
 ```
 
 ## License

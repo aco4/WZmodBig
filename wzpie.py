@@ -9,19 +9,20 @@ class PieData(TypedDict):
     type: Literal['component', 'structure', 'feature', 'effect']
     subtype: str | None
 
-pie_dict: dict[str, PieData] = {}
+cache: dict[str, PieData] = {}
 
 def get(pie_name: str):
     if not is_pie_name(pie_name): raise TypeError('pie_name is not type pie_name')
 
-    if pie_dict.get(pie_name) is None and not find(pie_name):
+    if cache.get(pie_name) is None and cache_write(pie_name) is False:
         return None
-    return pie_dict.get(pie_name)
+    return cache.get(pie_name)
 
 
 # Type check
 def is_pie_name(string: object):
     return isinstance(string, str) and string.islower() and len(string) > 4 and not string.startswith(BASE_URL) and string.endswith('.pie')
+
 
 # GET request
 BASE_URL = 'https://raw.githubusercontent.com/Warzone2100/warzone2100/refs/heads/master/data/'
@@ -34,7 +35,7 @@ def request(url: str):
     except requests.exceptions.RequestException:
         return None
 
-def find(pie_name: str):
+def cache_write(pie_name: str):
     if not is_pie_name(pie_name): raise TypeError('pie_name is not type pie_name')
 
     # Edge case
@@ -42,7 +43,7 @@ def find(pie_name: str):
         pie_url = BASE_URL + 'base/misc/researchimds/' + pie_name
         pie_text = request(pie_url)
         if pie_text:
-            pie_dict[pie_name] = {
+            cache[pie_name] = {
                 'url': pie_url,
                 'path': 'components/prop',
                 'text': pie_text,
@@ -56,7 +57,7 @@ def find(pie_name: str):
     pie_url = BASE_URL + 'base/components/prop/' + pie_name
     pie_text = request(pie_url)
     if pie_text:
-        pie_dict[pie_name] = {
+        cache[pie_name] = {
             'url': pie_url,
             'path': 'components/prop',
             'text': pie_text,
@@ -69,7 +70,7 @@ def find(pie_name: str):
     pie_url = BASE_URL + 'base/effects/' + pie_name
     pie_text = request(pie_url)
     if pie_text:
-        pie_dict[pie_name] = {
+        cache[pie_name] = {
             'url': pie_url,
             'path': 'effects',
             'text': pie_text,
@@ -82,7 +83,7 @@ def find(pie_name: str):
     pie_url = BASE_URL + 'base/components/weapons/' + pie_name
     pie_text = request(pie_url)
     if pie_text:
-        pie_dict[pie_name] = {
+        cache[pie_name] = {
             'url': pie_url,
             'path': 'components/weapons',
             'text': pie_text,
@@ -95,7 +96,7 @@ def find(pie_name: str):
     pie_url = BASE_URL + 'base/components/bodies/' + pie_name
     pie_text = request(pie_url)
     if pie_text:
-        pie_dict[pie_name] = {
+        cache[pie_name] = {
             'url': pie_url,
             'path': 'components/bodies',
             'text': pie_text,
@@ -108,7 +109,7 @@ def find(pie_name: str):
     pie_url = BASE_URL + 'mp/components/weapons/' + pie_name
     pie_text = request(pie_url)
     if pie_text:
-        pie_dict[pie_name] = {
+        cache[pie_name] = {
             'url': pie_url,
             'path': 'components/weapons',
             'text': pie_text,
@@ -121,7 +122,7 @@ def find(pie_name: str):
     pie_url = BASE_URL + 'mp/components/prop/' + pie_name
     pie_text = request(pie_url)
     if pie_text:
-        pie_dict[pie_name] = {
+        cache[pie_name] = {
             'url': pie_url,
             'path': 'components/prop',
             'text': pie_text,
@@ -134,7 +135,7 @@ def find(pie_name: str):
     pie_url = BASE_URL + 'mp/components/bodies/' + pie_name
     pie_text = request(pie_url)
     if pie_text:
-        pie_dict[pie_name] = {
+        cache[pie_name] = {
             'url': pie_url,
             'path': 'components/bodies',
             'text': pie_text,
@@ -147,7 +148,7 @@ def find(pie_name: str):
     pie_url = BASE_URL + 'base/structs/' + pie_name
     pie_text = request(pie_url)
     if pie_text:
-        pie_dict[pie_name] = {
+        cache[pie_name] = {
             'url': pie_url,
             'path': 'structs',
             'text': pie_text,
@@ -160,7 +161,7 @@ def find(pie_name: str):
     pie_url = BASE_URL + 'base/features/' + pie_name
     pie_text = request(pie_url)
     if pie_text:
-        pie_dict[pie_name] = {
+        cache[pie_name] = {
             'url': pie_url,
             'path': 'features',
             'text': pie_text,
@@ -173,7 +174,7 @@ def find(pie_name: str):
     pie_url = BASE_URL + 'mp/effects/' + pie_name
     pie_text = request(pie_url)
     if pie_text:
-        pie_dict[pie_name] = {
+        cache[pie_name] = {
             'url': pie_url,
             'path': 'effects',
             'text': pie_text,
