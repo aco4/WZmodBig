@@ -25,7 +25,7 @@ jobs:
         run: python -m pip install requests
 
       - name: Build the mod
-        run: ./build.sh
+        run: chmod +x ./build.sh && ./build.sh
 
       - name: Verify mod exists
         run: |
