@@ -24,6 +24,10 @@ To allow other propulsions to be compatible, include them:
 ```bash
 python3 main.py --scale 2 --inputs wheeled01 HalfTrack tracked01 hover01 V-Tol Body11ABT Cannon1Mk1 PillBox4 --vanillapropulsion
 ```
+To generate research entries and allow gameplay access, pass `--research`:
+```bash
+python3 main.py --scale 2 --inputs wheeled01 HalfTrack tracked01 hover01 V-Tol Body11ABT Cannon1Mk1 PillBox4 --vanillapropulsion --research
+```
 ## Suggested usage
 To scan a directory for inputs, use grep:
 ```bash

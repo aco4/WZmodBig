@@ -51,6 +51,7 @@ def parse_args():
     parser.add_argument("--scale", type=int, required=False)
     parser.add_argument("--inputs", nargs='+', required=False, default=[])
     parser.add_argument("--vanillapropulsion", action='store_true')
+    parser.add_argument("--research", action='store_true')
     parser.add_argument("--x2_inputs", nargs='+', required=False, default=[])
     parser.add_argument("--x3_inputs", nargs='+', required=False, default=[])
     parser.add_argument("--x4_inputs", nargs='+', required=False, default=[])
@@ -61,23 +62,23 @@ def main():
     args = parse_args()
 
     if args.inputs:
-        pies, diffs = wzstat.scale_all(args.inputs, prefix(args.scale), args.scale, vanilla_propulsion=args.vanillapropulsion)
+        pies, diffs = wzstat.scale_all(args.inputs, prefix(args.scale), args.scale, vanilla_propulsion=args.vanillapropulsion, research=args.research)
         write(pies, diffs, prefix(args.scale), args.scale)
     else:
         if args.x2_inputs:
-            pies, diffs = wzstat.scale_all(args.x2_inputs, prefix(2), 2, vanilla_propulsion=args.vanillapropulsion)
+            pies, diffs = wzstat.scale_all(args.x2_inputs, prefix(2), 2, vanilla_propulsion=args.vanillapropulsion, research=args.research)
             write(pies, diffs, prefix(2), 2)
 
         if args.x3_inputs:
-            pies, diffs = wzstat.scale_all(args.x3_inputs, prefix(3), 3, vanilla_propulsion=args.vanillapropulsion)
+            pies, diffs = wzstat.scale_all(args.x3_inputs, prefix(3), 3, vanilla_propulsion=args.vanillapropulsion, research=args.research)
             write(pies, diffs, prefix(3), 3)
 
         if args.x4_inputs:
-            pies, diffs = wzstat.scale_all(args.x4_inputs, prefix(4), 4, vanilla_propulsion=args.vanillapropulsion)
+            pies, diffs = wzstat.scale_all(args.x4_inputs, prefix(4), 4, vanilla_propulsion=args.vanillapropulsion, research=args.research)
             write(pies, diffs, prefix(4), 4)
 
         if args.x5_inputs:
-            pies, diffs = wzstat.scale_all(args.x5_inputs, prefix(5), 5, vanilla_propulsion=args.vanillapropulsion)
+            pies, diffs = wzstat.scale_all(args.x5_inputs, prefix(5), 5, vanilla_propulsion=args.vanillapropulsion, research=args.research)
             write(pies, diffs, prefix(5), 5)
 
 

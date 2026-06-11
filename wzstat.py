@@ -10,7 +10,7 @@ class NotFoundError(Exception):
 # Types
 PieName = str
 StatId = str
-StatFile = Literal['weapons.json', 'body.json', 'propulsion.json', 'structure.json', 'features.json']
+StatFile = Literal['weapons.json', 'body.json', 'propulsion.json', 'structure.json', 'features.json', 'research.json']
 PropulsionExtraModel = dict[Literal['left', 'still', 'moving'], PieName]
 class Weapon(TypedDict):
     id: StatId
@@ -44,7 +44,16 @@ class Structure(TypedDict):
 class Feature(TypedDict):
     id: StatId
     name: str
-StatItem = Weapon | Body | Propulsion | Structure | Feature
+class Research(TypedDict):
+    id: StatId
+    name: str
+    requiredResearch: list[StatId]
+    researchPoints: int
+    researchPower: int
+    resultComponents: list[StatId]
+    resultStructures: list[StatId]
+    statID: StatId
+StatItem = Weapon | Body | Propulsion | Structure | Feature | Research
 Diffs = dict[StatFile, dict[StatId, StatItem]]
 
 # Helpers
@@ -74,6 +83,10 @@ def lookup_stat_id(id: StatId) -> tuple[StatItem, StatFile]:
     if stat_item:
         return copy.deepcopy(stat_item), 'features.json'
 
+    stat_item = RESEARCH.get(id)
+    if stat_item:
+        return copy.deepcopy(stat_item), 'research.json'
+
     raise NotFoundError(f'{id} was not found!')
 
 def get_json(url: str):
@@ -91,25 +104,27 @@ def get_stats():
     c = get_json('https://raw.githubusercontent.com/Warzone2100/warzone2100/refs/heads/master/data/mp/stats/propulsion.json')
     d = get_json('https://raw.githubusercontent.com/Warzone2100/warzone2100/refs/heads/master/data/mp/stats/structure.json')
     e = get_json('https://raw.githubusercontent.com/Warzone2100/warzone2100/refs/heads/master/data/base/stats/features.json')
-    return cast(dict[StatId, Weapon], a), cast(dict[StatId, Body], b), cast(dict[StatId, Propulsion], c), cast(dict[StatId, Structure], d), cast(dict[StatId, Feature], e)
+    f = get_json('https://raw.githubusercontent.com/Warzone2100/warzone2100/refs/heads/master/data/mp/stats/research.json')
+    return cast(dict[StatId, Weapon], a), cast(dict[StatId, Body], b), cast(dict[StatId, Propulsion], c), cast(dict[StatId, Structure], d), cast(dict[StatId, Feature], e), cast(dict[StatId, Research], f)
 
-def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, vanilla_propulsion: bool=False, initial_stat_ids: frozenset[StatId]=frozenset()):
+def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, vanilla_propulsion: bool=False, initial_stat_ids: frozenset[StatId]=frozenset(), research: bool=False):
     discovered_pie_names = set[PieName]()
     discovered_stat_ids = set[StatId]()
 
     # Process id
     if 'id' in stat_item:
-        new_id = prefix + stat_item['id']
+        old_id = stat_item['id']
+        new_id = prefix + old_id
         stat_item['id'] = new_id
 
     # Process name
     if 'name' in stat_item:
         match scale:
-            case 2: modifier = 'Big'
-            case 3: modifier = 'Super Big'
-            case 4: modifier = 'Massive'
-            case _: modifier = 'Super Massive'
-        stat_item['name'] = modifier + ' ' + stat_item['name']
+            case 2: modifier = 'Big '
+            case 3: modifier = 'Super Big '
+            case 4: modifier = 'Massive '
+            case _: modifier = 'Super Massive '
+        stat_item['name'] = modifier + stat_item['name']
 
     # Process buildPower
     if 'buildPower' in stat_item:
@@ -165,6 +180,24 @@ def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, 
 
         stat_item['propulsionExtraModels'] = new_propulsion_extra_models
 
+    # Process research
+    if stat_file == 'research.json' and 'requiredResearch' in stat_item:
+        stat_item['requiredResearch'] = [old_id]
+    if stat_file == 'research.json' and 'researchPoints' in stat_item:
+        stat_item['researchPoints'] = min(65535, 2 * stat_item['researchPoints'])
+    if stat_file == 'research.json' and 'researchPower' in stat_item:
+        stat_item['researchPower'] *= 2
+    if stat_file == 'research.json' and 'resultComponents' in stat_item:
+        for result_component in stat_item['resultComponents']:
+            discovered_stat_ids.add(result_component)
+        stat_item['resultComponents'] = [ prefix + x for x in stat_item['resultComponents'] ]
+    if stat_file == 'research.json' and 'resultStructures' in stat_item:
+        for result_component in stat_item['resultStructures']:
+            discovered_stat_ids.add(result_component)
+        stat_item['resultStructures'] = [ prefix + x for x in stat_item['resultStructures'] ]
+    if stat_file == 'research.json' and 'statID' in stat_item:
+        stat_item['statID'] = prefix + stat_item['statID']
+
     # Process hitpoints
     if stat_file == 'body.json' and 'hitpoints' in stat_item:
         stat_item['hitpoints'] *= scale**2
@@ -172,8 +205,6 @@ def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, 
     # Process size
     if stat_file == 'body.json' and 'size' in stat_item:
         if scale == 2 and stat_item['size'] == 'LIGHT':
-            stat_item['size'] = 'MEDIUM'
-        elif scale == 2 and stat_item['size'] == 'MEDIUM' or scale == 3 and stat_item['size'] == 'LIGHT':
             stat_item['size'] = 'HEAVY'
         else:
             stat_item['size'] = 'SUPER HEAVY'
@@ -196,12 +227,24 @@ def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, 
 
     return stat_item, discovered_pie_names, discovered_stat_ids
 
-
-def scale_all(stat_ids: list[StatId], prefix: str, SCALE: int, vanilla_propulsion: bool=False):
+def scale_all(stat_ids: list[StatId], prefix: str, SCALE: int, vanilla_propulsion: bool=False, research: bool=False):
     # Helper data structures
     work_queue: list[StatId] = stat_ids
     initial_stat_ids = frozenset[StatId](stat_id for stat_id in stat_ids)
     finished_stat_ids = set[StatId]()
+
+    # Add research stat items
+    if research:
+        for research_item in RESEARCH.values():
+            for stat_id in stat_ids:
+                _, stat_file = lookup_stat_id(stat_id)
+                if stat_file == 'propulsion.json' and vanilla_propulsion:
+                    continue
+
+                if 'resultComponents' in research_item and stat_id in research_item['resultComponents']:
+                    work_queue.append(research_item['id'])
+                if 'resultStructures' in research_item and stat_id in research_item['resultStructures']:
+                    work_queue.append(research_item['id'])
 
     # Output
     unscaled_pie_names = set[PieName]()
@@ -214,7 +257,11 @@ def scale_all(stat_ids: list[StatId], prefix: str, SCALE: int, vanilla_propulsio
             continue
 
         stat_item, stat_file = lookup_stat_id(stat_id)
+
         if stat_file == 'propulsion.json' and vanilla_propulsion:
+            finished_stat_ids.add(stat_id)
+            continue
+        if stat_file == 'research.json' and not research:
             finished_stat_ids.add(stat_id)
             continue
 
@@ -227,7 +274,7 @@ def scale_all(stat_ids: list[StatId], prefix: str, SCALE: int, vanilla_propulsio
             prefix=prefix,
             scale=SCALE,
             initial_stat_ids=initial_stat_ids,
-            vanilla_propulsion=vanilla_propulsion
+            vanilla_propulsion=vanilla_propulsion,
         )
 
         finished_stat_ids.add(stat_id)
@@ -246,4 +293,4 @@ def scale_all(stat_ids: list[StatId], prefix: str, SCALE: int, vanilla_propulsio
 
 
 # Fetch data
-WEAPONS, BODY, PROPULSION, STRUCTURE, FEATURES = get_stats()
+WEAPONS, BODY, PROPULSION, STRUCTURE, FEATURES, RESEARCH = get_stats()
