@@ -33,14 +33,10 @@ jobs:
           ls -la mod
 
       - name: Create archive
-        run: |
-          ARCHIVE="${{ github.event.repository.name }}-${{ github.ref_name }}.zip"
-          cd mod
-          zip -r "../$ARCHIVE" .
-          cd ..
-          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+        run: zip -r mod.zip mod/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ env.ARCHIVE }}
+          name: ${{ github.event.repository.name }}-${{ github.sha }}
+          files: mod.zip

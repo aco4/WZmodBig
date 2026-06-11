@@ -33,15 +33,10 @@ jobs:
           ls -la mod
 
       - name: Create archive
-        run: |
-          ARCHIVE="${{ github.event.repository.name }}-${{ github.sha }}.zip"
-          cd mod
-          zip -r "../$ARCHIVE" .
-          cd ..
-          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+        run: zip -r mod.zip mod/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build
-          path: ${{ env.ARCHIVE }}
+          name: ${{ github.event.repository.name }}-${{ github.sha }}
+          path: mod.zip
