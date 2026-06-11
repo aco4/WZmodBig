@@ -2,8 +2,8 @@ name: Build and Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -41,13 +41,9 @@ jobs:
           test -d mod
           ls -la mod
 
-      - name: Get short SHA
-        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
       - name: Create release archive
         run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          ARCHIVE_NAME="${{ github.event.repository.name }}-${SHORT_SHA}.zip"
+          ARCHIVE_NAME="${{ github.event.repository.name }}-${{ github.ref_name }}.zip"
           cd mod
           zip -r "../$ARCHIVE_NAME" .
           cd ..
