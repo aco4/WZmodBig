@@ -1,0 +1,53 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: python -m pip install requests
+
+      - name: Build the mod
+        run: |
+          python3 main.py --scale 2 --inputs \
+            wheeled01 HalfTrack tracked01 hover01 V-Tol \
+            Body1REC Body5REC Body11ABT Body4ABT Body8MBT Body12SUP Body2SUP Body6SUPP Body9REC Body3MBT Body7ABT Body10MBT Body13SUP Body14SUP \
+            Cannon1Mk1 Cannon2A-TMk1 Cannon5VulcanMk1 Cannon375mmMk1 Cannon6TwinAslt \
+            Rocket-Pod Rocket-MRL Rocket-LtA-T Rocket-MRL-Hvy Rocket-HvyA-T \
+            Flame2 Flame1Mk1 \
+            MG2Mk1 MG3Mk1 MG4ROTARYMk1 MG5TWINROTARY \
+            PillBox1 PillBox4 PillBox5 GuardTower6 Emplacement-MortarPit01 X-Super-Cannon X-Super-Rocket Mortar1Mk1 \
+            --vanillapropulsion --research
+
+      - name: Verify mod exists
+        run: |
+          test -d mod
+          ls -la mod
+
+      - name: Create release archive
+        run: |
+          ARCHIVE_NAME="${{ github.event.repository.name }}-${{ github.ref_name }}.zip"
+          cd mod
+          zip -r "../$ARCHIVE_NAME" .
+          cd ..
+          echo "ARCHIVE_NAME=$ARCHIVE_NAME" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ARCHIVE_NAME }}
