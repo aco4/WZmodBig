@@ -32,7 +32,7 @@ jobs:
           test -d mod
           ls -la mod
 
-      - name: Create release archive
+      - name: Create archive
         run: |
           ARCHIVE_NAME="${{ github.event.repository.name }}-${{ github.ref_name }}.zip"
           cd mod

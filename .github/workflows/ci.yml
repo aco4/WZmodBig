@@ -1,4 +1,4 @@
-name: Build and Release
+name: CI Build
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +32,7 @@ jobs:
           test -d mod
           ls -la mod
 
-      - name: Create release archive
+      - name: Create archive
         run: |
           ARCHIVE_NAME="${{ github.event.repository.name }}-${{ github.sha }}.zip"
           cd mod
@@ -40,7 +40,8 @@ jobs:
           cd ..
           echo "ARCHIVE_NAME=$ARCHIVE_NAME" >> "$GITHUB_ENV"
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: ${{ env.ARCHIVE_NAME }}
+          name: build
+          path: ${{ env.ARCHIVE }}
