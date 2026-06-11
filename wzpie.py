@@ -184,6 +184,19 @@ def cache_write(pie_name: str):
         }
         return True
 
+    pie_url = BASE_URL + 'mp/structs/' + pie_name
+    pie_text = request(pie_url)
+    if pie_text:
+        cache[pie_name] = {
+            'url': pie_url,
+            'path': 'structs',
+            'text': pie_text,
+            'group': 'mp',
+            'type': 'structure',
+            'subtype': None
+        }
+        return True
+
     return False
 
 
