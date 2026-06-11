@@ -34,11 +34,11 @@ jobs:
 
       - name: Create archive
         run: |
-          ARCHIVE_NAME="${{ github.event.repository.name }}-${{ github.sha }}.zip"
+          ARCHIVE="${{ github.event.repository.name }}-${{ github.sha }}.zip"
           cd mod
-          zip -r "../$ARCHIVE_NAME" .
+          zip -r "../$ARCHIVE" .
           cd ..
-          echo "ARCHIVE_NAME=$ARCHIVE_NAME" >> "$GITHUB_ENV"
+          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
