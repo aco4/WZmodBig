@@ -198,6 +198,10 @@ def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, 
     if stat_file == 'research.json' and 'statID' in stat_item:
         stat_item['statID'] = prefix + stat_item['statID']
 
+    # Process damage
+    if stat_file == 'weapons.json' and 'damage' in stat_item:
+        stat_item['hitpoints'] *= scale
+
     # Process hitpoints
     if stat_file == 'body.json' and 'hitpoints' in stat_item:
         stat_item['hitpoints'] *= scale**2
