@@ -225,7 +225,7 @@ def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, 
     if stat_file == 'weapons.json' and 'shortRange' in stat_item:
         stat_item['shortRange'] += 128 * scale
 
-    # Process lon   ange
+    # Process longRange
     if stat_file == 'weapons.json' and 'longRange' in stat_item:
         stat_item['longRange'] += 128 * scale
 
