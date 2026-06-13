@@ -202,6 +202,14 @@ def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, 
     if stat_file == 'weapons.json' and 'damage' in stat_item:
         stat_item['hitpoints'] *= scale
 
+    # Process radius
+    if stat_file == 'weapons.json' and 'radius' in stat_item:
+        stat_item['radius'] += 64 * (scale - 1)
+
+    # Process radiusDamage
+    if stat_file == 'weapons.json' and 'radiusDamage' in stat_item:
+        stat_item['radiusDamage'] += 128 * scale
+
     # Process hitpoints
     if stat_file == 'body.json' and 'hitpoints' in stat_item:
         stat_item['hitpoints'] *= scale**2
@@ -217,7 +225,7 @@ def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, 
     if stat_file == 'weapons.json' and 'shortRange' in stat_item:
         stat_item['shortRange'] += 128 * scale
 
-    # Process longRange
+    # Process lon   ange
     if stat_file == 'weapons.json' and 'longRange' in stat_item:
         stat_item['longRange'] += 128 * scale
 
