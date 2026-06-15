@@ -5,5 +5,5 @@ python3 main.py --scale 2 --inputs \
     Rocket-Pod Rocket-MRL Rocket-LtA-T Rocket-MRL-Hvy Rocket-HvyA-T \
     Flame2 Flame1Mk1 \
     MG2Mk1 MG3Mk1 MG4ROTARYMk1 MG5TWINROTARY \
-    PillBox1 PillBox4 PillBox5 GuardTower6 Emplacement-MortarPit01 X-Super-Cannon X-Super-Rocket Mortar1Mk1 WallTower01 WallTower02 WallTower03 WallTower06 \
+    PillBox1 PillBox4 PillBox5 GuardTower6 Emplacement-MortarPit01 Mortar1Mk1 WallTower01 WallTower02 WallTower03 WallTower06 \
     --vanillapropulsion --research
