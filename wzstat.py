@@ -200,7 +200,7 @@ def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: float
 
     # Process damage
     if stat_file == 'weapons.json' and 'damage' in stat_item:
-        stat_item['hitpoints'] = round(stat_item['hitpoints'] * scale)
+        stat_item['damage'] = round(stat_item['damage'] * scale)
 
     # Process radius
     if stat_file == 'weapons.json' and 'radius' in stat_item:
