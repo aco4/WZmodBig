@@ -201,18 +201,27 @@ def cache_write(pie_name: str):
 
 
 # Pie manipulation
+def format_number(value: float):
+    # Strip float noise only, keep real precision: 41.800000000000004 -> '41.8', 0.986328 -> '0.986328'
+    text = f'{value:.10f}'.rstrip('0').rstrip('.')
+    return '0' if text == '-0' else text
+
 def scale(pie_text: str, scale: float):
     lines = pie_text.splitlines()
     output: list[str] = []
+    section = ''
     for line in lines:
         parts = line.strip().split()
         if line[0] == '\t' and len(parts) == 3:
             x, y, z = float(parts[0]), float(parts[1]), float(parts[2])
-            x2 = x * scale
-            y2 = y * scale
-            z2 = z * scale
-            output.append(f'\t{x2} {y2} {z2}')
+            if section == 'CONNECTORS':
+                # Warzone parses connectors as integers; '103.4' after '0 77' corrupts the file
+                fmt = lambda v: str(round(v))
+            else:
+                fmt = format_number
+            output.append(f'\t{fmt(x * scale)} {fmt(y * scale)} {fmt(z * scale)}')
         else:
+            if parts: section = parts[0]
             output.append(line)
 
     return '\n'.join(output)
