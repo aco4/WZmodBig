@@ -1,3 +1,4 @@
+import math
 import requests
 from typing import TypedDict, cast, Literal
 import copy
@@ -107,7 +108,7 @@ def get_stats():
     f = get_json('https://raw.githubusercontent.com/Warzone2100/warzone2100/refs/heads/master/data/mp/stats/research.json')
     return cast(dict[StatId, Weapon], a), cast(dict[StatId, Body], b), cast(dict[StatId, Propulsion], c), cast(dict[StatId, Structure], d), cast(dict[StatId, Feature], e), cast(dict[StatId, Research], f)
 
-def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, vanilla_propulsion: bool=False, initial_stat_ids: frozenset[StatId]=frozenset(), research: bool=False):
+def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: float, vanilla_propulsion: bool=False, initial_stat_ids: frozenset[StatId]=frozenset(), research: bool=False):
     discovered_pie_names = set[PieName]()
     discovered_stat_ids = set[StatId]()
 
@@ -119,20 +120,19 @@ def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, 
 
     # Process name
     if 'name' in stat_item:
-        match scale:
-            case 2: modifier = 'Big '
-            case 3: modifier = 'Super Big '
-            case 4: modifier = 'Massive '
-            case _: modifier = 'Super Massive '
+        if scale <= 2: modifier = 'Big '
+        elif scale <= 3: modifier = 'Super Big '
+        elif scale <= 4: modifier = 'Massive '
+        else: modifier = 'Super Massive '
         stat_item['name'] = modifier + stat_item['name']
 
     # Process buildPower
     if 'buildPower' in stat_item:
-        stat_item['buildPower'] *= scale
+        stat_item['buildPower'] = round(stat_item['buildPower'] * scale)
 
     # Process buildPoints
     if 'buildPoints' in stat_item:
-        stat_item['buildPoints'] *= scale
+        stat_item['buildPoints'] = round(stat_item['buildPoints'] * scale)
 
     # Collect top-level .pie names and update them
     for key, pie_name in stat_item.items():
@@ -200,46 +200,50 @@ def scale(stat_item: StatItem, stat_file: StatFile, *, prefix: str, scale: int, 
 
     # Process damage
     if stat_file == 'weapons.json' and 'damage' in stat_item:
-        stat_item['hitpoints'] *= scale
+        stat_item['hitpoints'] = round(stat_item['hitpoints'] * scale)
 
     # Process radius
     if stat_file == 'weapons.json' and 'radius' in stat_item:
-        stat_item['radius'] += 64 * (scale - 1)
+        stat_item['radius'] += round(64 * (scale - 1))
 
     # Process radiusDamage
     if stat_file == 'weapons.json' and 'radiusDamage' in stat_item:
-        stat_item['radiusDamage'] += 128 * scale
+        stat_item['radiusDamage'] += round(128 * scale)
 
     # Process hitpoints
     if stat_file == 'body.json' and 'hitpoints' in stat_item:
-        stat_item['hitpoints'] *= scale**2
+        stat_item['hitpoints'] = round(stat_item['hitpoints'] * scale**2)
 
     # Process size
     if stat_file == 'body.json' and 'size' in stat_item:
-        if scale == 2 and stat_item['size'] == 'LIGHT':
+        if scale < 2:
+            sizes = ['LIGHT', 'MEDIUM', 'HEAVY', 'SUPER HEAVY']
+            index = sizes.index(stat_item['size']) if stat_item['size'] in sizes else len(sizes) - 2
+            stat_item['size'] = sizes[min(index + 1, len(sizes) - 1)]
+        elif scale == 2 and stat_item['size'] == 'LIGHT':
             stat_item['size'] = 'HEAVY'
         else:
             stat_item['size'] = 'SUPER HEAVY'
 
     # Process shortRange
     if stat_file == 'weapons.json' and 'shortRange' in stat_item:
-        stat_item['shortRange'] += 128 * scale
+        stat_item['shortRange'] += round(128 * scale)
 
     # Process longRange
     if stat_file == 'weapons.json' and 'longRange' in stat_item:
-        stat_item['longRange'] += 128 * scale
+        stat_item['longRange'] += round(128 * scale)
 
     # Process width
     if stat_file == 'structure.json' and 'width' in stat_item:
-        stat_item['width'] *= scale
+        stat_item['width'] = math.ceil(stat_item['width'] * scale)
 
     # Process breadth
     if stat_file == 'structure.json' and 'breadth' in stat_item:
-        stat_item['breadth'] *= scale
+        stat_item['breadth'] = math.ceil(stat_item['breadth'] * scale)
 
     return stat_item, discovered_pie_names, discovered_stat_ids
 
-def scale_all(stat_ids: list[StatId], prefix: str, SCALE: int, vanilla_propulsion: bool=False, research: bool=False):
+def scale_all(stat_ids: list[StatId], prefix: str, SCALE: float, vanilla_propulsion: bool=False, research: bool=False):
     # Helper data structures
     work_queue: list[StatId] = stat_ids
     initial_stat_ids = frozenset[StatId](stat_id for stat_id in stat_ids)

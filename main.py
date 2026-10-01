@@ -17,7 +17,7 @@ class NotFoundError(Exception):
     pass
 
 
-def write_pies(pie_names: Iterable[str], prefix: str, scale: int):
+def write_pies(pie_names: Iterable[str], prefix: str, scale: float):
     for pie_name in pie_names:
         pie_name = pie_name.lower()
         pie_data = wzpie.get(pie_name)
@@ -39,16 +39,18 @@ def write_diffs(diffs: wzstat.Diffs, prefix: str):
         path.write_text(json.dumps(diff))
         print('Wrote', path)
 
-def write(pie_names: Iterable[str], diffs: wzstat.Diffs, prefix: str, scale: int):
+def write(pie_names: Iterable[str], diffs: wzstat.Diffs, prefix: str, scale: float):
     write_pies(pie_names, prefix, scale)
     write_diffs(diffs, prefix)
 
-def prefix(scale: int):
-    return f'x{scale}_'
+def prefix(scale: float):
+    # Avoid '.' in ids/filenames: 1.5 -> 'x1_5_', 2.0 -> 'x2_'
+    text = str(int(scale)) if scale == int(scale) else str(scale)
+    return f'x{text.replace(".", "_")}_'
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--scale", type=int, required=False)
+    parser.add_argument("--scale", type=float, required=False)
     parser.add_argument("--inputs", nargs='+', required=False, default=[])
     parser.add_argument("--vanillapropulsion", action='store_true')
     parser.add_argument("--research", action='store_true')
